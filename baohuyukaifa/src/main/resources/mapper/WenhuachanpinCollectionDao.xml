@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.WenhuachanpinCollectionDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.wenhuachanpin_id as wenhuachanpinId
+        ,a.yonghu_id as yonghuId
+        ,a.wenhuachanpin_collection_types as wenhuachanpinCollectionTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.WenhuachanpinCollectionView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,wenhuachanpin.wenhuachanpin_name as wenhuachanpinName
+        ,wenhuachanpin.wenhuachanpin_photo as wenhuachanpinPhoto
+        ,wenhuachanpin.wenhuachanpin_types as wenhuachanpinTypes
+        ,wenhuachanpin.wenhuachanpin_kucun_number as wenhuachanpinKucunNumber
+        ,wenhuachanpin.wenhuachanpin_old_money as wenhuachanpinOldMoney
+        ,wenhuachanpin.wenhuachanpin_new_money as wenhuachanpinNewMoney
+        ,wenhuachanpin.wenhuachanpin_content as wenhuachanpinContent
+        ,wenhuachanpin.shangxia_types as shangxiaTypes
+        ,wenhuachanpin.wenhuachanpin_clicknum as wenhuachanpinClicknum
+        ,wenhuachanpin.wenhuachanpin_delete as wenhuachanpinDelete
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_email as yonghuEmail
+        ,yonghu.new_money as newMoney
+
+        FROM wenhuachanpin_collection  a
+        left JOIN wenhuachanpin wenhuachanpin ON a.wenhuachanpin_id = wenhuachanpin.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.wenhuachanpinId != null and params.wenhuachanpinId != ''">
+                and (
+                    a.wenhuachanpin_id = #{params.wenhuachanpinId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test="params.wenhuachanpinCollectionTypes != null and params.wenhuachanpinCollectionTypes != ''">
+                and a.wenhuachanpin_collection_types = #{params.wenhuachanpinCollectionTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断文化产品的id不为空 -->
+            <if test=" params.wenhuachanpinIdNotNull != '' and params.wenhuachanpinIdNotNull != null and params.wenhuachanpinIdNotNull != 'null' ">
+                and a.wenhuachanpin_id IS NOT NULL
+            </if>
+            <if test=" params.wenhuachanpinName != '' and params.wenhuachanpinName != null and params.wenhuachanpinName != 'null' ">
+                and wenhuachanpin.wenhuachanpin_name like CONCAT('%',#{params.wenhuachanpinName},'%')
+            </if>
+            <if test="params.wenhuachanpinTypes != null  and params.wenhuachanpinTypes != ''">
+                and wenhuachanpin.wenhuachanpin_types = #{params.wenhuachanpinTypes}
+            </if>
+
+            <if test="params.wenhuachanpinKucunNumberStart != null  and params.wenhuachanpinKucunNumberStart != '' ">
+                <![CDATA[  and wenhuachanpin.wenhuachanpin_kucun_number >= #{params.wenhuachanpinKucunNumberStart}   ]]>
+            </if>
+            <if test="params.wenhuachanpinKucunNumberEnd != null  and params.wenhuachanpinKucunNumberEnd != '' ">
+                <![CDATA[  and wenhuachanpin.wenhuachanpin_kucun_number <= #{params.wenhuachanpinKucunNumberEnd}   ]]>
+            </if>
+            <if test="params.wenhuachanpinKucunNumber != null  and params.wenhuachanpinKucunNumber != '' ">
+                and wenhuachanpin.wenhuachanpin_kucun_number = #{params.wenhuachanpinKucunNumber}
+            </if>
+            <if test="params.wenhuachanpinOldMoneyStart != null ">
+                <![CDATA[  and wenhuachanpin.wenhuachanpin_old_money >= #{params.wenhuachanpinOldMoneyStart}   ]]>
+            </if>
+            <if test="params.wenhuachanpinOldMoneyEnd != null ">
+                <![CDATA[  and wenhuachanpin.wenhuachanpin_old_money <= #{params.wenhuachanpinOldMoneyEnd}   ]]>
+            </if>
+            <if test="params.wenhuachanpinNewMoneyStart != null ">
+                <![CDATA[  and wenhuachanpin.wenhuachanpin_new_money >= #{params.wenhuachanpinNewMoneyStart}   ]]>
+            </if>
+            <if test="params.wenhuachanpinNewMoneyEnd != null ">
+                <![CDATA[  and wenhuachanpin.wenhuachanpin_new_money <= #{params.wenhuachanpinNewMoneyEnd}   ]]>
+            </if>
+            <if test=" params.wenhuachanpinContent != '' and params.wenhuachanpinContent != null and params.wenhuachanpinContent != 'null' ">
+                and wenhuachanpin.wenhuachanpin_content like CONCAT('%',#{params.wenhuachanpinContent},'%')
+            </if>
+            <if test="params.shangxiaTypes != null  and params.shangxiaTypes != ''">
+                and wenhuachanpin.shangxia_types = #{params.shangxiaTypes}
+            </if>
+
+            <if test="params.wenhuachanpinClicknumStart != null  and params.wenhuachanpinClicknumStart != '' ">
+                <![CDATA[  and wenhuachanpin.wenhuachanpin_clicknum >= #{params.wenhuachanpinClicknumStart}   ]]>
+            </if>
+            <if test="params.wenhuachanpinClicknumEnd != null  and params.wenhuachanpinClicknumEnd != '' ">
+                <![CDATA[  and wenhuachanpin.wenhuachanpin_clicknum <= #{params.wenhuachanpinClicknumEnd}   ]]>
+            </if>
+            <if test="params.wenhuachanpinClicknum != null  and params.wenhuachanpinClicknum != '' ">
+                and wenhuachanpin.wenhuachanpin_clicknum = #{params.wenhuachanpinClicknum}
+            </if>
+            <if test="params.wenhuachanpinDeleteStart != null  and params.wenhuachanpinDeleteStart != '' ">
+                <![CDATA[  and wenhuachanpin.wenhuachanpin_delete >= #{params.wenhuachanpinDeleteStart}   ]]>
+            </if>
+            <if test="params.wenhuachanpinDeleteEnd != null  and params.wenhuachanpinDeleteEnd != '' ">
+                <![CDATA[  and wenhuachanpin.wenhuachanpin_delete <= #{params.wenhuachanpinDeleteEnd}   ]]>
+            </if>
+            <if test="params.wenhuachanpinDelete != null  and params.wenhuachanpinDelete != '' ">
+                and wenhuachanpin.wenhuachanpin_delete = #{params.wenhuachanpinDelete}
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+            <if test="params.newMoneyStart != null ">
+                <![CDATA[  and yonghu.new_money >= #{params.newMoneyStart}   ]]>
+            </if>
+            <if test="params.newMoneyEnd != null ">
+                <![CDATA[  and yonghu.new_money <= #{params.newMoneyEnd}   ]]>
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
